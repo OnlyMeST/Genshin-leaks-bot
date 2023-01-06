@@ -16,10 +16,9 @@ from datetime import datetime
 
 credentials = {}
 
-credentials["token"] = os.environ.get('5944534549:AAGI8YaTj3_P5YgMy-FMalVbfGUS1VNHneg')
-credentials["subreddit"] = os.environ.get('https://www.reddit.com/r/Genshin_Impact_Leaks')
-credentials["channel"] = os.environ.get('https://t.me/GenshinImpact_Leakschannel')
-
+credentials["token"] = os.environ.get('TOKEN')
+credentials["subreddit"] = os.environ.get('SUB')
+credentials["channel"] = os.environ.get('CHANNEL')
 token = credentials["token"]
 channel = credentials["channel"]
 sub = "Genshin_Impact_Leaks"
@@ -62,10 +61,10 @@ else:
     log.info("Last posted submission is {}".format(last_sub_id))
 
 r = praw.Reddit(user_agent="Genshin Impact Leaks",
-                client_id=os.environ.get('kLXmbgYfFp_OcaKKmqBGTg'),
-                client_secret=os.environ.get('4c33RFT8i2Iub6LEU35w2pV49QGA0g'),
-                username=os.environ.get('STDeveloper'),
-                password=os.environ.get('ringof666timeup'))
+                client_id=os.environ.get('CLIENT_ID'),
+                client_secret=os.environ.get('CLIENT_SECRET'),
+                username=os.environ.get('RUSERNAME'),
+                password=os.environ.get('RPASS'))
 r.read_only = True
 subreddit = r.subreddit(sub)
 
