@@ -1,0 +1,4 @@
+"scripts": {
+  "start": "webpack-dev-server --mode development", // you need to add this line
+  "test": "(eslint lib || true) && jest"
+}
