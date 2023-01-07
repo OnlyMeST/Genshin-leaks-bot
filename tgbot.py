@@ -1,5 +1,3 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import os
 import logging
@@ -113,10 +111,7 @@ def telegram_webhook():
 
 @app.route('/crony-secret-url')
 def periodic_msg_pooler():
-"""
-Curl this URL every x minutes with cron.
-(This is a quick hack for avoiding something like apscheduler)
-"""
+
     for user in get_subscribed_users():
         logging.info('sending ads to user %s' % user)
         send_ads_to_user(tgbot=bot, user=user)
