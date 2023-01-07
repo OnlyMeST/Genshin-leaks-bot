@@ -41,7 +41,7 @@ print("gonna end soon")
 
 def post_to_telegram():
   try:
-    for submission in subreddit.hot():
+    for submission in subreddit.new():
       image = html.escape(submission.url or '')
       title = html.escape(submission.title or '')
       link = "https://redd.it/{id}".format(id=submission.id)
