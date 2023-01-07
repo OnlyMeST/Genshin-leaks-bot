@@ -1,5 +1,3 @@
 telegram
 python-telegram-bot
 praw
-telegram.ext
-
