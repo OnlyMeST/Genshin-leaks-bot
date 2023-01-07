@@ -1,9 +1,5 @@
 telegram
 python-telegram-bot
 praw
-flask
-boto
-telepot
-dotenv
-os
-logging
+telegram.ext
+
