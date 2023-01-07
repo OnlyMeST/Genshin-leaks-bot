@@ -1,23 +1,8 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
 
 import shelve
 
-"""
-Simple on-disk key-value storage
-
-An easier interface for the shelve[1] module
-
-
-[1] https://docs.python.org/3/library/shelve.html
-
-author: xr09
-"""
-
 
 class Storit(object):
-
-    """key-value storage"""
 
     def __init__(self, store_name):
         self.store_name = store_name
@@ -43,16 +28,6 @@ class Storit(object):
             return str(key) in db
 
     def __enter__(self):
-        """
-        Right now context manager is dummy at best, it returns a raw shelve
-        object, add to every function the code to detect if is being executed
-        within a context and work accordingly.
-        if self._db:
-            seld._db
-        else:
-            raw shelve
-
-        """
         self._db = shelve.open(self.store_name)
         return self._db
 
