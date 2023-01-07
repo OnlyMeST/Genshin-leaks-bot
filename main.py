@@ -1,118 +1,34 @@
+import praw
+import telegram
+from telegram.ext import Updater, CommandHandler
 
-import os
-import logging
+def fetch_posts(subreddit):
+  # Set up the Reddit client
+  reddit = praw.Reddit(client_id='HDSU8U37RX-E88ev4hyqtw', client_secret='L8NRPbciXya3-XftyxBjeU0HSebvsA', user_agent='Genshin Leaks bot')
 
-from flask import Flask, request
-import telepot
-from reddit import authenticate, get_posts
-from dotenv import load_dotenv
+  # Fetch the top posts from the subreddit
+  posts = reddit.subreddit(subreddit).new(limit=10)
 
-from storit import Storit
+  return posts
 
+def send_posts(bot, posts, channel_id):
+  # Use the bot to send the posts to the specified channel
+  for post in posts:
+    message = f"{post.title}\nJoin : @Jenshin_Leaks"
+    bot.send_message(channel_id, message)
 
-MSG_DB = 'last'
-SUBS_DB = 'subs'
+def start(bot, update):
+  # Fetch the posts and send them to the channel
+  posts = fetch_posts('r/Genshin_Impact_Leaks')
+  send_posts(bot, posts, '@Jenshin_Leaks')
 
+def main():
+  # Set up the Telegram bot
+  bot = telegram.Bot(token='5944534549:AAGI8YaTj3_P5YgMy-FMalVbfGUS1VNHneg')
+  updater = Updater(bot=bot)
+  handler = CommandHandler('start', start)
+  updater.dispatcher.add_handler(handler)
+  updater.start_polling()
 
-load_dotenv()
-
-
-def get_last_message(user_id):
-    store = Storit(MSG_DB)
-    return store[user_id]
-    
-
-def save_last_message(user_id, msg_id):
-    store = Storit(MSG_DB)
-    store[user_id] = msg_id
-    
-
-def subscribe_user(user_id):
-    store = Storit(SUBS_DB)
-    store[user_id] = True
-    logging.debug('user %s has subscribed' % user_id)
-
-
-def unsubscribe_user(user_id):
-    store = Storit(SUBS_DB)
-    ret = store.delete_if_exists(user_id)
-    if ret:
-        logging.debug('user %s has unsubscribed' % user_id)
-
-
-def get_subscribed_users():
-    store = Storit(SUBS_DB)
-    return store.keys()
-
-
-def get_pending_messages(user_id, ads):
-    '''
-    Returns pending messages for each user
-    The order is from oldest to newest
-    '''
-    last_msg = get_last_message(user_id)
-    if last_msg and last_msg in ads:
-        pos = ads.index(last_msg)
-        if pos > 0:
-            # send pending ads
-            return reversed(ads[:pos])
-        else:
-            # no new ads
-            return []
-    # send all ads
-    return reversed(ads)
-
-
-def send_ads_to_user(tgbot, user, manual=False):
-    posts = get_hiring_posts(reddit=authenticate())
-    pending = get_pending_messages(user, posts)
-    if pending:
-        lm = None
-        for post in pending:
-            lm = post
-            try:
-                tgbot.sendMessage(user, "*{}*\n[link]({})".format(post.title, post.url), parse_mode='Markdown')
-            except telepot.exception.BotWasBlockedError:
-                logging.debug('User {} blocked me'.format(user))
-        assert lm is not None
-        logging.debug("saving user %s with msg %s" % (user, lm))
-        save_last_message(user, lm)
-    elif manual:
-        tgbot.sendMessage(user, 'Nothing new to see here')
-
-secret = os.getenv('botsecret')
-bot = os.getenv('botid')
-bot.setWebhook("https://mybot.mydomain.net/{}".format(secret),
-               max_connections=1)
-
-
-app = Flask(__name__)
-
-
-@app.route('/{}'.format(secret), methods=["POST"])
-def telegram_webhook():
-    update = request.get_json()
-    if "message" in update:
-        text = update["message"]["text"]
-        chat_id = update["message"]["chat"]["id"]
-        if text == '/new':
-            send_ads_to_user(tgbot=bot, user=chat_id, manual=True)
-        elif text == '/sub':
-            subscribe_user(chat_id)
-            bot.sendMessage(chat_id, 'New submissions will be notified'
-                                     ' every 10 minutes (if any)')
-        elif text == '/unsub':
-            unsubscribe_user(chat_id)
-            bot.sendMessage(chat_id, 'Subscription cancelled')
-        else:
-            bot.sendMessage(chat_id, "Doesn't look like anything to me..")
-    return 'OK'
-
-
-@app.route('/crony-secret-url')
-def periodic_msg_pooler():
-
-    for user in get_subscribed_users():
-        logging.info('sending ads to user %s' % user)
-        send_ads_to_user(tgbot=bot, user=user)
-    return 'OK'
+if __name__ == '__main__':
+  main()
