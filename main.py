@@ -1,6 +1,7 @@
 import praw
 import telegram
 from telegram.ext import Updater, CommandHandler
+from telegram.ext import Dispatcher
 
 def fetch_posts(subreddit):
   # Set up the Reddit client
@@ -25,7 +26,10 @@ def start(bot, update):
 def main():
   # Set up the Telegram bot
   bot = telegram.Bot(token='5944534549:AAGI8YaTj3_P5YgMy-FMalVbfGUS1VNHneg')
-  updater = Updater(bot=bot)
+  # Create a Dispatcher instance
+  dispatcher = Dispatcher(bot=bot, update_queue=None, workers=4, exception_handlers=None)
+  # Use the Dispatcher instance as the dispatcher argument for the Updater
+  updater = Updater(bot=bot, dispatcher=dispatcher)
   handler = CommandHandler('start', start)
   updater.dispatcher.add_handler(handler)
   updater.start_polling()
