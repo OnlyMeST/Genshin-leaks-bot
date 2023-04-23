@@ -1,34 +1,38 @@
 import praw
 import telegram
-from telegram.ext import Updater, CommandHandler
+import os
 
-def fetch_posts(subreddit):
-  # Set up the Reddit client
-  reddit = praw.Reddit(client_id='HDSU8U37RX-E88ev4hyqtw', client_secret='L8NRPbciXya3-XftyxBjeU0HSebvsA', user_agent='Genshin Leaks bot')
+reddit = praw.Reddit(client_id='lWARc9TxLMS3XG04JLbHBw',
+                     client_secret='x6l5-ezVxyIE5vNYYqYNnr_pbGOLfw',
+                     user_agent='Genshin-Leaks',
+                     redirect_uri='http://localhost:8080')
 
-  # Fetch the top posts from the subreddit
-  posts = reddit.subreddit(subreddit).new(limit=10)
+bot = telegram.Bot(token='5944534549:AAGI8YaTj3_P5YgMy-FMalVbfGUS1VNHneg')
+chat_id = '1515286332'
 
-  return posts
+subreddit_name = 'Genshin_Impact_Leaks'
 
-def send_posts(bot, posts, channel_id):
-  # Use the bot to send the posts to the specified channel
-  for post in posts:
-    message = f"{post.title}\nJoin : @Jenshin_Leaks"
-    bot.send_message(channel_id, message)
+last_post_id = ''
 
-def start(bot, update):
-  # Fetch the posts and send them to the channel
-  posts = fetch_posts('r/Genshin_Impact_Leaks')
-  send_posts(bot, posts, '@Jenshin_Leaks')
+while True:
+    try:
+        # Fetch the newest posts from the subreddit
+        subreddit = reddit.subreddit(subreddit_name)
+        new_posts = subreddit.new(limit=10)
 
-def main():
-  # Set up the Telegram bot
-  bot = telegram.Bot(token='5944534549:AAGI8YaTj3_P5YgMy-FMalVbfGUS1VNHneg')
-  updater = Updater(bot=bot)
-  # Add the start command handler directly to the Updater
-  updater.dispatcher.add_handler(CommandHandler('start', start))
-  updater.start_polling()
+        # Loop through the new posts and post them to Telegram
+        for post in new_posts:
+            if post.id != last_post_id:
+                if post.url.endswith('.jpg') or post.url.endswith('.jpeg') or post.url.endswith('.png'):
+                    bot.send_photo(chat_id=chat_id, photo=post.url, caption=post.title)
+                elif post.url.endswith('.gif') or post.url.endswith('.mp4'):
+                    bot.send_video(chat_id=chat_id, video=post.url, caption=post.title)
+                else:
+                    bot.send_message(chat_id=chat_id, text=post.url)
 
-if __name__ == '__main__':
-  main()
+                last_post_id = post.id
+
+        time.sleep(60)
+
+    except Exception as e:
+        print(e)
